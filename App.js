@@ -14,9 +14,10 @@ import {
   View,
   Text,
   StatusBar,
-  Alert
+  Alert,
 } from 'react-native';
-import BackgroundGeolocation from '@mauron85/react-native-background-geolocation';
+// import BackgroundGeolocation from '@mauron85/react-native-background-geolocation';
+import GPSState from '@digidem/react-native-gps-state';
 import {
   Header,
   LearnMoreLinks,
@@ -27,85 +28,118 @@ import {
 type Props = {};
 export default class App extends Component<Props> {
   componentDidMount() {
-    BackgroundGeolocation.configure({
-      stopOnTerminate: true,
-      locationProvider: BackgroundGeolocation.ACTIVITY_PROVIDER,
-    });
+    // BackgroundGeolocation.configure({
+    //   stopOnTerminate: true,
+    //   locationProvider: BackgroundGeolocation.ACTIVITY_PROVIDER,
+    // });
 
-    BackgroundGeolocation.on('authorization', status => {
-      console.log(
-        '[INFO] BackgroundGeolocation authorization status: ' + status,
-      );
-      if (status !== BackgroundGeolocation.AUTHORIZED) {
-        // we need to set delay or otherwise alert may not be shown
-        setTimeout(
-          () =>
-            Alert.alert(
-              'App requires location tracking permission',
-              'Would you like to open app settings?',
-              [
-                {
-                  text: 'Yes',
-                  onPress: () => BackgroundGeolocation.showAppSettings(),
-                },
-                {
-                  text: 'No',
-                  onPress: () => console.log('No Pressed'),
-                  style: 'cancel',
-                },
-              ],
-            ),
-          1000,
-        );
-      }
-      if (status === 1) {
-        BackgroundGeolocation.checkStatus(status => {
-          console.log(
-            '[INFO] BackgroundGeolocation service is running !AUTHORIZED',
-            status.isRunning,
-          );
-          console.log(
-            '[INFO] BackgroundGeolocation services enabled !AUTHORIZED',
-            status.locationServicesEnabled,
-          );
-          console.log(
-            '[INFO] BackgroundGeolocation auth status: !AUTHORIZED' + status.authorization,
-          );
+    // BackgroundGeolocation.on('authorization', status => {
+    //   console.log(
+    //     '[INFO] BackgroundGeolocation authorization status: ' + status,
+    //   );
+    //   if (status !== BackgroundGeolocation.AUTHORIZED) {
+    //     // we need to set delay or otherwise alert may not be shown
+    //     setTimeout(
+    //       () =>
+    //         Alert.alert(
+    //           'App requires location tracking permission',
+    //           'Would you like to open app settings?',
+    //           [
+    //             {
+    //               text: 'Yes',
+    //               onPress: () => BackgroundGeolocation.showAppSettings(),
+    //             },
+    //             {
+    //               text: 'No',
+    //               onPress: () => console.log('No Pressed'),
+    //               style: 'cancel',
+    //             },
+    //           ],
+    //         ),
+    //       1000,
+    //     );
+    //   }
+    //   if (status === 1) {
+    //     BackgroundGeolocation.checkStatus(status => {
+    //       console.log(
+    //         '[INFO] BackgroundGeolocation service is running !AUTHORIZED',
+    //         status.isRunning,
+    //       );
+    //       console.log(
+    //         '[INFO] BackgroundGeolocation services enabled !AUTHORIZED',
+    //         status.locationServicesEnabled,
+    //       );
+    //       console.log(
+    //         '[INFO] BackgroundGeolocation auth status: !AUTHORIZED' + status.authorization,
+    //       );
 
-          // you don't need to check status before start (this is just the example)
-          if (!status.isRunning) {
-            BackgroundGeolocation.start(); //triggers start on start event
-          }
-        });
-      }
-    });
+    //       // you don't need to check status before start (this is just the example)
+    //       if (!status.isRunning) {
+    //         BackgroundGeolocation.start(); //triggers start on start event
+    //       }
+    //     });
+    //   }
+    // });
 
-    BackgroundGeolocation.checkStatus(status => {
-      console.log(
-        '[INFO] BackgroundGeolocation service is running',
-        status.isRunning,
-      );
-      console.log(
-        '[INFO] BackgroundGeolocation services enabled',
-        status.locationServicesEnabled,
-      );
-      console.log(
-        '[INFO] BackgroundGeolocation auth status: ' + status.authorization,
-      );
+    // BackgroundGeolocation.checkStatus(status => {
+    //   console.log(
+    //     '[INFO] BackgroundGeolocation service is running',
+    //     status.isRunning,
+    //   );
+    //   console.log(
+    //     '[INFO] BackgroundGeolocation services enabled',
+    //     status.locationServicesEnabled,
+    //   );
+    //   console.log(
+    //     '[INFO] BackgroundGeolocation auth status: ' + status.authorization,
+    //   );
 
-      // you don't need to check status before start (this is just the example)
-      if (!status.isRunning) {
-        BackgroundGeolocation.start(); //triggers start on start event
-      }
-    });
+    //   if (!status.isRunning) {
+    //     BackgroundGeolocation.start();
+    //   }
+    // });
 
     // you can also just start without checking for status
     // BackgroundGeolocation.start();
+
+    GPSState.addListener((status) => {
+      GPSState.getStatus().then(status => {
+        console.log('status getStatus', status)
+      });
+      switch (status) {
+        case GPSState.NOT_DETERMINED:
+          alert(
+            'Please, allow the location, for us to do amazing things for you!',
+          );
+          break;
+
+        case GPSState.RESTRICTED:
+          // GPSState.openSettings();
+          break;
+
+        case GPSState.DENIED:
+          alert('It`s a shame that you do not allowed us to use location :(');
+          break;
+
+        case GPSState.AUTHORIZED_ALWAYS:
+          //TODO do something amazing with you app
+          alert('AUTHORIZED_ALWAYS');
+          break;
+
+        case GPSState.AUTHORIZED_WHENINUSE:
+          //TODO do something amazing with you app
+          alert('AUTHORIZED_WHENINUSE');
+          break;
+      }
+    });
+    GPSState.requestAuthorization(GPSState.AUTHORIZED_WHENINUSE);
   }
 
   componentWillUnmount() {
     // unregister all event listeners
-    BackgroundGeolocation.removeAllListeners();
+    // BackgroundGeolocation.removeAllListeners();
+    console.log('removeListener');
+    GPSState.removeListener();
   }
   render() {
     return (

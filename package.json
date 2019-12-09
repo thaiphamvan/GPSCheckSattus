@@ -11,6 +11,7 @@
     "android:run": "concurrently -r 'npx jetify' 'npx react-native start' 'npx react-native run-android'"
   },
   "dependencies": {
+    "@digidem/react-native-gps-state": "^1.0.0",
     "@mauron85/react-native-background-geolocation": "^0.6.3",
     "@react-native-community/async-storage": "^1.6.3",
     "concurrently": "^4.1.2",
